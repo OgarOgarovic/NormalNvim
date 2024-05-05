@@ -295,6 +295,10 @@ maps.n["<leader>C"] = { -- Close buffer keeping the window.
   function() require("heirline-components.buffer").close() end,
   desc = "Close buffer",
 }
+maps.n["<leader><Tab>"] = { -- Switch previous buffer
+  function() vim.api.nvim_command('b#') end,
+  desc = "Switch buffers",
+}
 -- Close buffer keeping the window → Without confirmation.
 -- maps.n["<leader>X"] = {
 --   function() require("heirline-components.buffer").close(0, true) end,
@@ -878,17 +882,16 @@ if is_available "telescope.nvim" then
     function() require("telescope.builtin").commands() end,
     desc = "Find commands",
   }
-  -- Let's disable this. It is way too imprecise. Use rnvimr instead.
-  -- maps.n["<leader>ff"] = {
-  --   function()
-  --     require("telescope.builtin").find_files { hidden = true, no_ignore = true }
-  --   end,
-  --   desc = "Find all files",
-  -- }
-  -- maps.n["<leader>fF"] = {
-  --   function() require("telescope.builtin").find_files() end,
-  --   desc = "Find files (no hidden)",
-  -- }
+  maps.n["<leader>ff"] = {
+    function()
+      require("telescope.builtin").find_files { hidden = true, no_ignore = true }
+    end,
+    desc = "Find all files",
+  }
+  maps.n["<leader>fF"] = {
+    function() require("telescope.builtin").find_files() end,
+    desc = "Find files (no hidden)",
+  }
   maps.n["<leader>fh"] = {
     function() require("telescope.builtin").help_tags() end,
     desc = "Find help",
@@ -928,7 +931,7 @@ if is_available "telescope.nvim" then
     end,
     desc = "Find themes",
   }
-  maps.n["<leader>ff"] = {
+  maps.n["<leader>fx"] = {
     function()
       require("telescope.builtin").live_grep {
         additional_args = function(args)
@@ -938,7 +941,7 @@ if is_available "telescope.nvim" then
     end,
     desc = "Find words in project",
   }
-  maps.n["<leader>fF"] = {
+  maps.n["<leader>fX"] = {
     function() require("telescope.builtin").live_grep() end,
     desc = "Find words in project (no hidden)",
   }
