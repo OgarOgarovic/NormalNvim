@@ -541,6 +541,14 @@ return {
     },
   },
 
+  -- telescope lines
+  -- https://github.com/neanias/telescope-lines.nvim
+  {
+    "neanias/telescope-lines.nvim",
+    requires = "nvim-telescope/telescope.nvim",
+
+  },
+
   --  nvim-neoclip [nvim clipboard]
   --  https://github.com/AckslD/nvim-neoclip.lua
   --  Read their docs to enable cross-session history.
@@ -705,6 +713,40 @@ return {
           vim.cmd(":silent! doautocmd ColorScheme")                    -- heirline colorscheme reload event
         end
       }
+    end
+  },
+
+  -- neovim org mode
+  -- https://github.com/nvim-orgmode/orgmode
+  {
+    'nvim-orgmode/orgmode',
+    event = 'VeryLazy',
+    ft = { 'org' },
+    config = function()
+      -- Setup orgmode
+      require('orgmode').setup({
+        org_agenda_files = '~/org/**/*',
+        org_default_notes_file = '~/org/inbox.org',
+      })
+
+      -- NOTE: If you are using nvim-treesitter with `ensure_installed = "all"` option
+      -- add `org` to ignore_install
+      -- require('nvim-treesitter.configs').setup({
+      --   ensure_installed = 'all',
+      --   ignore_install = { 'org' },
+      -- })
+    end,
+  },
+
+  -- vim-surround
+  -- https://github.com/tpope/vim-surround
+  {
+    "kylechui/nvim-surround",
+    event = "VeryLazy",
+    config = function()
+        require("nvim-surround").setup({
+            -- Configuration here, or leave empty to use defaults
+        })
     end
   },
 
