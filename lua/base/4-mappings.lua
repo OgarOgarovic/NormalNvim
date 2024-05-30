@@ -261,6 +261,9 @@ maps.n["<C-a>"] = { -- to move to the previous position press ctrl + oo
   desc = "Visually select all",
 }
 
+-- Random customs -----------------------------------------------------------
+maps.n["<leader>sp"] = { "<cmd>e ~/scratchpad<CR>G$a<CR>", desc = "Open scratchpad" }
+
 -- packages -----------------------------------------------------------------
 -- lazy
 maps.n["<leader>p"] = icons.p
