@@ -545,7 +545,7 @@ return {
   -- https://github.com/neanias/telescope-lines.nvim
   {
     "neanias/telescope-lines.nvim",
-    requires = "nvim-telescope/telescope.nvim",
+    dependencies = { "nvim-telescope/telescope.nvim" },
 
   },
 
@@ -554,7 +554,7 @@ return {
   --  Read their docs to enable cross-session history.
   {
     "AckslD/nvim-neoclip.lua",
-    requires = 'nvim-telescope/telescope.nvim',
+    dependencies = { 'nvim-telescope/telescope.nvim' },
     event = "User BaseFile",
     opts = {}
   },

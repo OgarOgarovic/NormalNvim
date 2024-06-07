@@ -97,7 +97,7 @@ maps.n["<leader>W"] =
 maps.n["<leader>n"] = { "<cmd>enew<cr>", desc = "New file" }
 maps.n["gx"] =
 { utils.open_with_program, desc = "Open the file under cursor with a program" }
-maps.n["<C-s>"] = { "<cmd>w!<cr>", desc = "Force write" }
+-- maps.n["<leader>bw>"] = { function() vim.cmd "<cmd>w!<cr>", desc = "Force write" }
 maps.n["|"] = { "<cmd>vsplit<cr>", desc = "Vertical Split" }
 maps.n["\\"] = { "<cmd>split<cr>", desc = "Horizontal Split" }
 maps.i["<C-BS>"] = { "<C-W>", desc = "Enable CTRL+backsace to delete." }
@@ -1077,14 +1077,18 @@ if is_available "toggleterm.nvim" then
 end
 
 -- extra - improved terminal navigation
-maps.t["<C-h>"] =
+maps.t["<Tab>h"] =
 { "<cmd>wincmd h<cr>", desc = "Terminal left window navigation" }
-maps.t["<C-j>"] =
+maps.n["<Tab>h"] = maps.t["<Tab>h"]
+maps.t["<Tab>j"] =
 { "<cmd>wincmd j<cr>", desc = "Terminal down window navigation" }
-maps.t["<C-k>"] =
+maps.n["<Tab>j"] = maps.t["<Tab>j"]
+maps.t["<Tab>k"] =
 { "<cmd>wincmd k<cr>", desc = "Terminal up window navigation" }
-maps.t["<C-l>"] =
+maps.n["<Tab>k"] = maps.t["<Tab>k"]
+maps.t["<Tab>l"] =
 { "<cmd>wincmd l<cr>", desc = "Terminal right window navigation" }
+maps.n["<Tab>l"] = maps.t["<Tab>l"]
 
 -- dap.nvim [debugger] -----------------------------------------------------
 -- Depending your terminal some F keys may not work. To fix it:
@@ -1340,6 +1344,15 @@ if is_available "hop.nvim" then
       vim.cmd("silent! HopWord")
     end,
     desc = "Hop to word",
+  }
+end
+
+if is_available "venv-selector.nvim" then
+  maps.n["<leader>sv"] = {
+    function()
+      vim.cmd "VenvSelect"
+    end,
+    desc = "Select virtual environment",
   }
 end
 
