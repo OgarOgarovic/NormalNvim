@@ -40,6 +40,8 @@
 
 --       ## LANGUAGE IMPROVEMENTS
 --       -> guttentags_plus                [auto generate C/C++ tags]
+--
+--       ## YAML SCHEMAS
 
 local is_windows = vim.fn.has('win32') == 1 -- true if on windows
 
@@ -177,16 +179,17 @@ return {
     "stevearc/aerial.nvim",
     event = "User BaseFile",
     opts = {
-      filter_kind = { -- Symbols that will appear on the tree
-        -- "Class",
-        "Constructor",
-        "Enum",
-        "Function",
-        "Interface",
-        -- "Module",
-        "Method",
-        -- "Struct",
-      },
+      -- filter_kind = { -- Symbols that will appear on the tree
+      --   -- "Class",
+      --   "Constructor",
+      --   "Enum",
+      --   "Function",
+      --   "Interface",
+      --   -- "Module",
+      --   "Method",
+      --   -- "Struct",
+      -- },
+      filter_kind = false,
       open_automatic = false, -- Open if the buffer is compatible
       autojump = true,
       link_folds_to_tree = false,
@@ -946,5 +949,30 @@ return {
     },
     event = 'VeryLazy', -- Optional: needed only if you want to type `:VenvSelect` without a keymapping
   },
+  -- YAML Companion
+  -- https://github.com/someone-stole-my-name/yaml-companion.nvim
+  {
+    'someone-stole-my-name/yaml-companion.nvim',
+    dependencies = {
+      'neovim/nvim-lspconfig',
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope.nvim'
+    },
+    config = function()
+      require("telescope").load_extension("yaml_schema")
+      local cfg = require("yaml-companion").setup({
+        -- Add any options here, or leave empty to use the default settings
+        -- lspconfig = {
+        --   cmd = {"yaml-language-server"}
+        -- },
+      })
+      require("lspconfig")["yamlls"].setup(cfg)
+    end,
+  },
+  {
+    "ellisonleao/glow.nvim",
+    config = true,
+    cmd = "Glow",
+  }
 
 } -- end of return

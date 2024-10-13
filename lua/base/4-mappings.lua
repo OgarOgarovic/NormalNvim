@@ -877,6 +877,10 @@ if is_available "telescope.nvim" then
     function() require("telescope.builtin").buffers() end,
     desc = "Find buffers",
   }
+  maps.n["<leader>fd"] = {
+    function() require("telescope.builtin").treesitter() end,
+    desc = "Find definitions",
+  }
   maps.n["<leader>fw"] = {
     function() require("telescope.builtin").grep_string() end,
     desc = "Find word under cursor in project",

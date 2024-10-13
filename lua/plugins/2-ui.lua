@@ -705,5 +705,15 @@ return {
     end,
   },
 
+  --  minimap
+  --  https://github.com/wfxr/minimap.vim
+  {
+    "wfxr/minimap.vim",
+    opts = {
+      minimap_autostart = 1,
+    },
+    config = function(_, opts)
+    end,
+  },
 
 } -- end of return

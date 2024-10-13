@@ -82,7 +82,7 @@ return {
       exclude_dirs = {
         "~/"
       },
-      silent_chdir = true,
+      silent_chdir = false,
       manual_mode = false,
 
       -- Don't auto-chdir for specific filetypes.
@@ -92,6 +92,7 @@ return {
       exclude_buftype_chdir = { "nofile", "terminal" },
 
       --ignore_lsp = { "lua_ls" },
+      detection_methods = { "pattern", "lsp" },
     },
     config = function(_, opts) require("project_nvim").setup(opts) end,
   },
@@ -727,6 +728,9 @@ return {
       require('orgmode').setup({
         org_agenda_files = '~/org/**/*',
         org_default_notes_file = '~/org/inbox.org',
+        org_id_method = 'org',
+        org_agenda_span = 'week',
+        org_log_repeat = 'note',
       })
 
       -- NOTE: If you are using nvim-treesitter with `ensure_installed = "all"` option
