@@ -3,11 +3,8 @@
 -- Here you can define your nvim variables.
 -- ----------------------------------------
 
--- NormalNvin lua globals
-_G.base = {}
-
 -- Theme
-base.default_colorscheme = "tokyonight-night"
+vim.g.default_colorscheme = "tokyonight-night"
 
 -- Options --------------------------------------------------------------------
 vim.opt.breakindent = true -- Wrap indent to match  line start.
@@ -26,8 +23,8 @@ vim.opt.foldcolumn = "1" -- Show foldcolumn in nvim 0.9+.
 vim.opt.ignorecase = true -- Case insensitive searching.
 vim.opt.infercase = true -- Infer cases in keyword completion.
 
-vim.opt.laststatus = 3 -- Globalstatus.
-vim.opt.linebreak = true -- Wrap lines at'breakat'.
+vim.opt.laststatus = 3 -- Global statusline.
+vim.opt.linebreak = true -- Wrap lines at 'breakat'.
 vim.opt.number = true -- Show numberline.
 vim.opt.preserveindent = true -- Preserve indent structure as much as possible.
 vim.opt.pumheight = 10 -- Height of the pop up menu.
@@ -43,7 +40,6 @@ vim.opt.splitright = true -- Splitting a new window at the right of the current 
 vim.opt.tabstop = 4 -- Number of space in a tab.
 
 vim.opt.termguicolors = true -- Enable 24-bit RGB color in the TUI.
-vim.opt.timeoutlen = 500 -- Shorten key timeout length a little bit for which-key.
 vim.opt.undofile = true -- Enable persistent undo between session and reboots.
 vim.opt.updatetime = 300 -- Length of time to wait before triggering the plugin.
 vim.opt.virtualedit = "block" -- Allow going past end of line in visual block mode.
@@ -71,7 +67,7 @@ if is_android then vim.opt.mouse = "v" else vim.opt.mouse = "a" end -- Enable sc
 -- Globals --------------------------------------------------------------------
 vim.g.mapleader = " " -- Set leader key.
 vim.g.maplocalleader = "," -- Set default local leader key.
-vim.g.big_file = { size = 1024 * 100, lines = 10000 } -- For files bigger than this, disable 'treesitter' (+100kb).
+vim.g.big_file = { size = 1024 * 5000, lines = 50000 } -- For files bigger than this, disable 'treesitter' (+5Mb).
 
 -- The next globals are toggleable with <space + l + u>
 vim.g.autoformat_enabled = false -- Enable auto formatting at start.
@@ -80,7 +76,7 @@ vim.g.cmp_enabled = true -- Enable completion at start.
 vim.g.codeactions_enabled = true -- Enable displaying 💡 where code actions can be used.
 vim.g.codelens_enabled = true -- Enable automatic codelens refreshing for lsp that support it.
 vim.g.diagnostics_mode = 3 -- Set code linting (0=off, 1=only show in status line, 2=virtual text off, 3=all on).
-vim.g.icons_enabled = true -- Enable icons in the UI (disable if no nerd font is available).
+vim.g.fallback_icons_enabled = false -- Enable it if you need to use Neovim in a machine without nerd fonts.
 vim.g.inlay_hints_enabled = false -- Enable always show function parameter names.
 vim.g.lsp_round_borders_enabled = true -- Enable round borders for lsp hover and signatureHelp.
 vim.g.lsp_signature_enabled = true -- Enable automatically showing lsp help as you write function parameters.

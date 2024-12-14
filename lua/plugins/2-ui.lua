@@ -1,5 +1,5 @@
 -- User interface
--- Things that make the GUI better.
+-- Plugins that make the user interface better.
 
 --    Sections:
 --       -> tokyonight                  [theme]
@@ -11,7 +11,6 @@
 --       -> heirline                    [ui components]
 --       -> telescope                   [search]
 --       -> telescope-fzf-native.nvim   [search backend]
---       -> smart-splits                [window-dimming]
 --       -> dressing.nvim               [better ui elements]
 --       -> noice.nvim                  [better cmd/search line]
 --       -> nvim-web-devicons           [icons | ui]
@@ -21,16 +20,16 @@
 --       -> highlight-undo              [highlights]
 --       -> which-key                   [on-screen keybinding]
 
-local utils = require "base.utils"
+local utils = require("base.utils")
 local is_windows = vim.fn.has('win32') == 1         -- true if on windows
 local is_android = vim.fn.isdirectory('/data') == 1 -- true if on android
 
 return {
 
-  -- tokyonight [theme]
-  -- https://github.com/folke/tokyonight.nvim
+  --  tokyonight [theme]
+  --  https://github.com/folke/tokyonight.nvim
   {
-    "Zeioth/tokyonight.nvim",
+    "folke/tokyonight.nvim",
     event = "User LoadColorSchemes",
     opts = {
       dim_inactive = false,
@@ -147,27 +146,35 @@ return {
         }
       end
 
-      dashboard.section.header.opts.hl = "DashboardHeader"
-      vim.cmd "highlight DashboardHeader guifg=#F7778F"
 
-      -- If on windows, don't show the 'ranger' button
-      local ranger_button = dashboard.button("r", "🐍 Ranger  ", "<cmd>RnvimrToggle<CR>")
-      if is_windows then ranger_button = nil end
+      local get_icon = require("base.utils").get_icon
+
+      dashboard.section.header.opts.hl = "DashboardHeader"
+      vim.cmd("highlight DashboardHeader guifg=#F7778F")
+
+      -- If yazi is not installed, don't show the button.
+      local is_yazi_installed = vim.fn.executable("ya") == 1
+      local yazi_button = dashboard.button("r", get_icon("GreeterYazi") .. " Yazi", "<cmd>Yazi<CR>")
+      if not is_yazi_installed then yazi_button = nil end
 
       -- Buttons
       dashboard.section.buttons.val = {
-        dashboard.button("n", "📄 New     ", "<cmd>ene<CR>"),
-        dashboard.button("e", "🌺 Recent  ", "<cmd>Telescope oldfiles<CR>"),
-        ranger_button,
-        dashboard.button(
-          "s",
-          "🔎 Sessions",
+        dashboard.button("n",
+          get_icon("GreeterNew") .. " New",
+          "<cmd>ene<CR>"),
+        dashboard.button("e",
+          get_icon("GreeterRecent") .. " Recent  ",
+          "<cmd>Telescope oldfiles<CR>"),
+        yazi_button,
+        dashboard.button("s",
+          get_icon("GreeterSessions") .. " Sessions",
           "<cmd>SessionManager! load_session<CR>"
         ),
-        dashboard.button("p", "💼 Projects", "<cmd>Telescope projects<CR>"),
+        dashboard.button("p",
+          get_icon("GreeterProjects") .. " Projects",
+          "<cmd>Telescope projects<CR>"),
         dashboard.button("", ""),
         dashboard.button("q", "   Quit", "<cmd>exit<CR>"),
-        --  --button("LDR f '", "  Bookmarks  "),
       }
 
       -- Vertical margins
@@ -188,6 +195,7 @@ return {
         desc = "Add Alpha dashboard footer",
         once = true,
         callback = function()
+          local  footer_icon = require("base.utils").get_icon("GreeterPlug")
           local stats = require("lazy").stats()
           stats.real_cputime = not is_windows
           local ms = math.floor(stats.startuptime * 100 + 0.5) / 100
@@ -195,11 +203,11 @@ return {
             " ",
             " ",
             " ",
-            "Loaded " .. stats.loaded .. " plugins  in " .. ms .. "ms",
+            "Loaded " .. stats.loaded .. " plugins " .. footer_icon .. " in " .. ms .. "ms",
             ".............................",
           }
           opts.section.footer.opts.hl = "DashboardFooter"
-          vim.cmd "highlight DashboardFooter guifg=#D29B68"
+          vim.cmd("highlight DashboardFooter guifg=#D29B68")
           pcall(vim.cmd.AlphaRedraw)
         end,
       })
@@ -288,13 +296,25 @@ return {
   },
 
   -- heirline-components.nvim [ui components]
-  -- https://github.com/Zeioth/heirline-components.nvim
+  -- https://github.com/zeioth/heirline-components.nvim
   -- Collection of components to use on your heirline config.
   {
     "zeioth/heirline-components.nvim",
-    opts = {
-      icons = require("base.icons.nerd_font")
-    }
+    opts = function()
+      -- return different items depending of the value of `vim.g.fallback_icons_enabled`
+      local function get_icons()
+        if vim.g.fallback_icons_enabled then
+          return require("base.icons.fallback_icons")
+        else
+          return require("base.icons.icons")
+        end
+      end
+
+      -- opts
+      return {
+        icons = get_icons(),
+      }
+    end
   },
 
   --  heirline [ui components]
@@ -307,14 +327,22 @@ return {
     dependencies = { "zeioth/heirline-components.nvim" },
     event = "User BaseDefered",
     opts = function()
-      local lib = require "heirline-components.all"
+      local lib = require("heirline-components.all")
       return {
         opts = {
           disable_winbar_cb = function(args) -- We do this to avoid showing it on the greeter.
             local is_disabled = not require("heirline-components.buffer").is_valid(args.buf) or
                 lib.condition.buffer_matches({
                   buftype = { "terminal", "prompt", "nofile", "help", "quickfix" },
-                  filetype = { "NvimTree", "neo%-tree", "dashboard", "Outline", "aerial" },
+                  filetype = {
+                    "NvimTree",
+                    "neo%-tree",
+                    "dashboard",
+                    "Outline",
+                    "aerial",
+                    "rnvimr",
+                    "yazi"
+                  },
                 }, args.buf)
             return is_disabled
           end,
@@ -335,7 +363,6 @@ return {
               lib.component.neotree(),
               lib.component.compiler_play(),
               lib.component.fill(),
-              lib.component.compiler_build_type(),
               lib.component.compiler_redo(),
               lib.component.aerial(),
             },
@@ -401,7 +428,7 @@ return {
       },
       {
         "nvim-telescope/telescope-fzf-native.nvim",
-        enabled = vim.fn.executable "make" == 1,
+        enabled = vim.fn.executable("make") == 1,
         build = "make",
       },
     },
@@ -411,8 +438,6 @@ return {
       local actions = require("telescope.actions")
       local mappings = {
         i = {
-          ["<C-n>"] = actions.cycle_history_next,
-          ["<C-p>"] = actions.cycle_history_prev,
           ["<C-j>"] = actions.move_selection_next,
           ["<C-k>"] = actions.move_selection_previous,
           ["<ESC>"] = actions.close,
@@ -422,8 +447,9 @@ return {
       }
       return {
         defaults = {
-          prompt_prefix = get_icon("Selected", 1),
-          selection_caret = get_icon("Selected", 1),
+          prompt_prefix = get_icon("PromptPrefix") .. " ",
+          selection_caret = get_icon("PromptPrefix") .. " ",
+          multi_icon = get_icon("PromptPrefix") .. " ",
           path_display = { "truncate" },
           sorting_strategy = "ascending",
           layout_config = {
@@ -444,7 +470,7 @@ return {
           undo = {
             use_delta = true,
             side_by_side = true,
-            diff_context_lines = 0,
+            vim_diff_opts = { ctxlen = 0 },
             entry_format = "󰣜 #$ID, $STAT, $TIME",
             layout_strategy = "horizontal",
             layout_config = {
@@ -536,38 +562,22 @@ return {
   --  https://github.com/nvim-tree/nvim-web-devicons
   {
     "nvim-tree/nvim-web-devicons",
-    enabled = vim.g.icons_enabled,
+    enabled = not vim.g.fallback_icons_enabled,
     event = "User BaseDefered",
     opts = {
       override = {
         default_icon = {
-          icon = require("base.utils").get_icon("DefaultFile"),
-          name = "default"
+          icon = require("base.utils").get_icon("DefaultFile")
         },
-        deb = { icon = "", name = "Deb" },
-        lock = { icon = "󰌾", name = "Lock" },
-        mp3 = { icon = "󰎆", name = "Mp3" },
-        mp4 = { icon = "", name = "Mp4" },
-        out = { icon = "", name = "Out" },
-        ["robots.txt"] = { icon = "󰚩", name = "Robots" },
-        ttf = { icon = "", name = "TrueTypeFont" },
-        rpm = { icon = "", name = "Rpm" },
-        woff = { icon = "", name = "WebOpenFontFormat" },
-        woff2 = { icon = "", name = "WebOpenFontFormat2" },
-        xz = { icon = "", name = "Xz" },
-        zip = { icon = "", name = "Zip" },
       },
     },
-    config = function(_, opts)
-      require("nvim-web-devicons").setup(opts)
-      pcall(vim.api.nvim_del_user_command, "NvimWebDeviconsHiTest")
-    end
   },
 
   --  LSP icons [icons]
   --  https://github.com/onsails/lspkind.nvim
   {
     "onsails/lspkind.nvim",
+    enabled = not vim.g.fallback_icons_enabled,
     opts = {
       mode = "symbol",
       symbol_map = {
@@ -590,7 +600,6 @@ return {
       },
       menu = {},
     },
-    enabled = vim.g.icons_enabled,
     config = function(_, opts)
       require("lspkind").init(opts)
     end,
@@ -613,7 +622,7 @@ return {
         "noice",
         "prompt",
         "TelescopePrompt",
-        "alpha",
+        "alpha"
       },
     },
   },
@@ -668,15 +677,11 @@ return {
   --  This plugin only flases on redo.
   --  But we also have a autocmd to flash on yank.
   {
-    "tzachar/highlight-undo.nvim",
+    "zeioth/highlight-undo.nvim",
     event = "User BaseDefered",
     opts = {
-      hlgroup = "CurSearch",
       duration = 150,
-      keymaps = {
-        { "n", "u",     "undo", {} }, -- If you remap undo/redo, change this
-        { "n", "<C-r>", "redo", {} },
-      },
+      redo = { hlgroup = 'IncSearch' },
     },
     config = function(_, opts)
       require("highlight-undo").setup(opts)
@@ -685,7 +690,9 @@ return {
       vim.api.nvim_create_autocmd("TextYankPost", {
         desc = "Highlight yanked text",
         pattern = "*",
-        callback = function() vim.highlight.on_yank() end,
+        callback = function()
+          (vim.hl or vim.highlight).on_yank()
+        end,
       })
     end,
   },
@@ -695,9 +702,15 @@ return {
   {
     "folke/which-key.nvim",
     event = "User BaseDefered",
+
+    opts_extend = { "disable.ft", "disable.bt" },
     opts = {
-      icons = { group = vim.g.icons_enabled and "" or "+", separator = "" },
-      disable = { filetypes = { "TelescopePrompt" } },
+      preset = "classic", -- "classic", "modern", or "helix"
+      icons = {
+        group = (vim.g.fallback_icons_enabled and "+") or "",
+        rules = false,
+        separator = "-",
+      },
     },
     config = function(_, opts)
       require("which-key").setup(opts)

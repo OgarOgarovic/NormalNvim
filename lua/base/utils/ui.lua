@@ -1,5 +1,5 @@
 --- ### UI toggle functions.
---
+
 --  DESCRIPTION:
 --  While you could technically delete this file, we encourage you
 --  to keep it as it takes a lot of complexity out of `../4-mappings.lua`.
@@ -110,6 +110,7 @@ function M.toggle_background()
 end
 
 --- Toggle buffer local auto format
+--- @param bufnr? number the buffer to toggle `autoformat` on.
 function M.toggle_buffer_autoformat(bufnr)
   bufnr = bufnr or 0
   local old_val = vim.b[bufnr].autoformat_enabled
@@ -119,20 +120,20 @@ function M.toggle_buffer_autoformat(bufnr)
 end
 
 --- Toggle LSP inlay hints (buffer)
--- @param bufnr? number the buffer to toggle the clients on
+--- @param bufnr? number the buffer to toggle the `inlay hints` on.
 function M.toggle_buffer_inlay_hints(bufnr)
   bufnr = bufnr or 0
   vim.b[bufnr].inlay_hints_enabled = not vim.b[bufnr].inlay_hints_enabled
-  vim.lsp.inlay_hint(bufnr, vim.b[bufnr].inlay_hints_enabled)
-  utils.notify(string.format("Inlay hints %s", bool2str(vim.b[bufnr].inlay_hints_enabled)))
+  vim.lsp.inlay_hint.enable(vim.b[bufnr].inlay_hints_enabled, { bufnr = bufnr })
+  utils.notify(string.format("Buffer inlay hints %s", bool2str(vim.b[bufnr].inlay_hints_enabled)))
 end
 
 --- Toggle buffer semantic token highlighting for all language servers that support it
---@param bufnr? number the buffer to toggle the clients on
+--- @param bufnr? number the buffer to toggle `semantic tokens` on.
 function M.toggle_buffer_semantic_tokens(bufnr)
   bufnr = bufnr or 0
   vim.b[bufnr].semantic_tokens_enabled = not vim.b[bufnr].semantic_tokens_enabled
-  for _, client in ipairs(vim.lsp.get_active_clients({ bufnr = bufnr })) do
+  for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
     if client.server_capabilities.semanticTokensProvider then
       vim.lsp.semantic_tokens[vim.b[bufnr].semantic_tokens_enabled and "start" or "stop"](bufnr, client.id)
       utils.notify(string.format("Buffer lsp semantic highlighting %s", bool2str(vim.b[bufnr].semantic_tokens_enabled)))
@@ -141,6 +142,7 @@ function M.toggle_buffer_semantic_tokens(bufnr)
 end
 
 --- Toggle syntax highlighting and treesitter
+--- @param bufnr? number the buffer to toggle `treesitter` on.
 function M.toggle_buffer_syntax(bufnr)
   -- HACK: this should just be `bufnr = bufnr or 0` but it looks like
   --       `vim.treesitter.stop` has a bug with `0` being current.
@@ -159,13 +161,20 @@ function M.toggle_buffer_syntax(bufnr)
 end
 
 --- Toggle codelens
-function M.toggle_codelens()
+--- @param bufnr? number the buffer to toggle `codelens` on.
+function M.toggle_codelens(bufnr)
+  bufnr = bufnr or 0
   vim.g.codelens_enabled = not vim.g.codelens_enabled
-  if not vim.g.codelens_enabled then vim.lsp.codelens.clear() end
+  if vim.g.codelens_enabled then
+    vim.lsp.codelens.refresh({ bufnr = bufnr })
+  else
+    vim.lsp.codelens.clear()
+  end
   utils.notify(string.format("CodeLens %s", bool2str(vim.g.codelens_enabled)))
 end
 
 --- Toggle coverage signs
+--- @param bufnr? number the buffer to toggle `coverage signs` on.
 function M.toggle_coverage_signs(bufnr)
   bufnr = bufnr or 0
   vim.b[bufnr].coverage_signs_enabled = not vim.b[bufnr].coverage_signs_enabled
@@ -220,11 +229,12 @@ function M.toggle_foldcolumn()
 end
 
 --- Toggle LSP inlay hints (global)
--- @param bufnr? number the buffer to toggle the clients on
+--- @param bufnr? number the buffer to toggle the `inlay_hints` on.
 function M.toggle_inlay_hints(bufnr)
-  vim.g.inlay_hints_enabled = not vim.g.inlay_hints_enabled     -- flip global state
-  vim.b.inlay_hints_enabled = not vim.g.inlay_hints_enabled     -- sync buffer state
-  vim.lsp.buf.inlay_hint(bufnr or 0, vim.g.inlay_hints_enabled) -- apply state
+  bufnr = bufnr or 0
+  vim.g.inlay_hints_enabled = not vim.g.inlay_hints_enabled -- flip global state
+  vim.b.inlay_hints_enabled = not vim.g.inlay_hints_enabled -- sync buffer state
+  vim.lsp.buf.inlay_hint.enable(vim.g.inlay_hints_enabled, { bufnr = bufnr }) -- apply state
   utils.notify(string.format("Global inlay hints %s", bool2str(vim.g.inlay_hints_enabled)))
 end
 
@@ -301,6 +311,7 @@ function M.toggle_wrap()
 end
 
 --- Toggle zen mode
+--- @param bufnr? number the buffer to toggle `zen mode` on.
 function M.toggle_zen_mode(bufnr)
   bufnr = bufnr or 0
   if not vim.b[bufnr].zen_mode then

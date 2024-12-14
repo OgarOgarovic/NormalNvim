@@ -1,10 +1,7 @@
 -- Dev
--- Things you actively use for coding.
+-- Plugins you actively use for coding.
 
 --    Sections:
---       ## COMMENTS
---       -> comment.nvim                   [comment with a key]
-
 --       ## SNIPPETS
 --       -> luasnip                        [snippet engine]
 --       -> friendly-snippets              [snippet templates]
@@ -46,29 +43,6 @@
 local is_windows = vim.fn.has('win32') == 1 -- true if on windows
 
 return {
-  --  COMMENTS ----------------------------------------------------------------
-  --  Advanced comment features [comment with a key]
-  --  https://github.com/numToStr/Comment.nvim
-  {
-    "numToStr/Comment.nvim",
-    event = "User BaseFile",
-    opts = function()
-      -- improve performance, when possible
-      local _, ts_context_commentstring =
-          pcall(require, "ts_context_commentstring.integrations.comment_nvim")
-      local pre_hook = ts_context_commentstring.create_pre_hook() or nil
-
-      -- opts
-      return {
-        pre_hook = pre_hook
-      }
-    end,
-    keys = {
-      { "gc", mode = { "n", "v" }, desc = "Comment toggle linewise" },
-      { "gb", mode = { "n", "v" }, desc = "Comment toggle blockwise" },
-    },
-  },
-
   --  SNIPPETS ----------------------------------------------------------------
   --  Vim Snippets engine  [snippet engine] + [snippet templates]
   --  https://github.com/L3MON4D3/LuaSnip
@@ -78,7 +52,7 @@ return {
     build = not is_windows and "make install_jsregexp" or nil,
     dependencies = {
       "rafamadriz/friendly-snippets",
-      "Zeioth/NormalSnippets",
+      "zeioth/NormalSnippets",
       "benfowler/telescope-luasnip.nvim",
     },
     event = "User BaseFile",
@@ -115,7 +89,7 @@ return {
   --  https://github.com/lewis6991/gitsigns.nvim
   {
     "lewis6991/gitsigns.nvim",
-    enabled = vim.fn.executable "git" == 1,
+    enabled = vim.fn.executable("git") == 1,
     event = "User BaseGitFile",
     opts = function()
       local get_icon = require("base.utils").get_icon
@@ -148,7 +122,7 @@ return {
   --  	keepBackup = false
   {
     "tpope/vim-fugitive",
-    enabled = vim.fn.executable "git" == 1,
+    enabled = vim.fn.executable("git") == 1,
     dependencies = { "tpope/vim-rhubarb" },
     cmd = {
       "Gvdiffsplit",
@@ -167,7 +141,7 @@ return {
       "Gstatus",
     },
     config = function()
-      -- NOTE: On vimplugins we use config instead of opts.
+      -- NOTE: On vim plugins we use config instead of opts.
       vim.g.fugitive_no_maps = 1
     end,
   },
@@ -201,6 +175,7 @@ return {
         },
       },
       open_automatic = false, -- Open if the buffer is compatible
+      nerd_font = (vim.g.fallback_icons_enabled and false) or true,
       autojump = true,
       link_folds_to_tree = false,
       link_tree_to_folds = false,
@@ -208,7 +183,11 @@ return {
       backends = { "lsp", "treesitter", "markdown", "man" },
       disable_max_lines = vim.g.big_file.lines,
       disable_max_size = vim.g.big_file.size,
-      layout = { min_width = 28 },
+      layout = {
+        min_width = 28,
+        default_direction = "right",
+        placement = "edge",
+      },
       show_guides = true,
       guides = {
         mid_item = "├ ",
@@ -229,14 +208,14 @@ return {
     },
     config = function(_, opts)
       require("aerial").setup(opts)
-      -- HACK: The first time you opened aerial on a session, close all folds.
-      vim.api.nvim_create_autocmd("FileType", {
-        desc = "Aerial: The first time its open on a session, close all folds.",
+      -- HACK: The first time you open aerial on a session, close all folds.
+      vim.api.nvim_create_autocmd({"FileType", "BufEnter"}, {
+        desc = "Aerial: When aerial is opened, close all its folds.",
         callback = function()
           local is_aerial = vim.bo.filetype == "aerial"
           local is_ufo_available = require("base.utils").is_available("nvim-ufo")
-          if is_ufo_available and is_aerial and vim.g.new_aerial_session == nil then
-            vim.g.new_aerial_session = false
+          if is_ufo_available and is_aerial and vim.b.new_aerial_session == nil then
+            vim.b.new_aerial_session = false
             require("aerial").tree_set_collapse_level(0, 0)
           end
         end,
@@ -253,6 +232,9 @@ return {
     event = "User BaseFile",
     opts = {
       notify = { enabled = false },
+      tree = {
+          icon_set = "default" -- "nerd", "codicons", "default", "simple"
+      },
       panel = {
           orientation = "bottom",
           panel_size = 10,
@@ -302,9 +284,9 @@ return {
 
   --  CODE DOCUMENTATION ------------------------------------------------------
   --  dooku.nvim [html doc generator]
-  --  https://github.com/Zeioth/dooku.nvim
+  --  https://github.com/zeioth/dooku.nvim
   {
-    "Zeioth/dooku.nvim",
+    "zeioth/dooku.nvim",
     cmd = {
       "DookuGenerate",
       "DookuOpen",
@@ -328,10 +310,10 @@ return {
   },
 
   --  [markdown markmap]
-  --  https://github.com/Zeioth/markmap.nvim
+  --  https://github.com/zeioth/markmap.nvim
   --  Important: Make sure you have yarn in your PATH before running markmap.
   {
-    "Zeioth/markmap.nvim",
+    "zeioth/markmap.nvim",
     build = "yarn global add markmap-cli",
     cmd = { "MarkmapOpen", "MarkmapSave", "MarkmapWatch", "MarkmapWatchStop" },
     config = function(_, opts) require("markmap").setup(opts) end,
@@ -355,7 +337,7 @@ return {
           },
         },
         ui = {
-          prompt_icon = ">",
+          prompt_icon = require("base.utils").get_icon("PromptPrefix"),
         },
       }
     end,
@@ -384,20 +366,14 @@ return {
   {
     "NMAC427/guess-indent.nvim",
     event = "User BaseFile",
-    config = function(_, opts)
-      require("guess-indent").setup(opts)
-      vim.cmd.lua {
-        args = { "require('guess-indent').set_from_buffer('auto_cmd')" },
-        mods = { silent = true },
-      }
-    end,
+    opts = {}
   },
 
   --  COMPILER ----------------------------------------------------------------
   --  compiler.nvim [compiler]
-  --  https://github.com/Zeioth/compiler.nvim
+  --  https://github.com/zeioth/compiler.nvim
   {
-    "Zeioth/compiler.nvim",
+    "zeioth/compiler.nvim",
     cmd = {
       "CompilerOpen",
       "CompilerToggleResults",
@@ -410,6 +386,8 @@ return {
 
   --  overseer [task runner]
   --  https://github.com/stevearc/overseer.nvim
+  --  If you need to close a task immediately:
+  --  press ENTER in the output menu on the task you wanna close.
   {
     "stevearc/overseer.nvim",
     cmd = {
@@ -428,23 +406,21 @@ return {
       "OverseerClearCache"
     },
     opts = {
-      -- Tasks are disposed 5 minutes after running to free resources.
-      -- If you need to close a task immediately:
-      -- press ENTER in the output menu on the task you wanna close.
-      task_list = { -- this refers to the window that shows the result
+     task_list = { -- the window that shows the results.
         direction = "bottom",
         min_height = 25,
         max_height = 25,
         default_detail = 1,
       },
-      -- component_aliases = { -- uncomment this to disable notifications
-      --   -- Components included in default will apply to all tasks
+      -- component_aliases = {
       --   default = {
-      --     { "display_duration", detail_level = 2 },
-      --     "on_output_summarize",
-      --     "on_exit_set_status",
-      --     --"on_complete_notify",
-      --     "on_complete_dispose",
+      --     -- Behaviors that will apply to all tasks.
+      --     "on_exit_set_status",                   -- don't delete this one.
+      --     "on_output_summarize",                  -- show last line on the list.
+      --     "display_duration",                     -- display duration.
+      --     "on_complete_notify",                   -- notify on task start.
+      --     "open_output",                          -- focus last executed task.
+      --     { "on_complete_dispose", timeout=300 }, -- dispose old tasks.
       --   },
       -- },
     },
@@ -488,8 +464,7 @@ return {
 
       -- Java
       -- Note: The java debugger jdtls is automatically spawned and configured
-      -- when a java file is opened by the plugin nvim-java.
-      -- Compatible with maven, gradle, and projects created by eclipse.
+      -- by the plugin 'nvim-java' in './3-dev-core.lua'.
 
       -- Python
       dap.adapters.python = {
@@ -845,7 +820,7 @@ return {
       "sidlatau/neotest-dart",
       "Issafalcon/neotest-dotnet",
       "jfpedroza/neotest-elixir",
-      "nvim-neotest/neotest-go",
+      "fredrikaverpil/neotest-golang",
       "rcasia/neotest-java",
       "nvim-neotest/neotest-jest",
       "olimorris/neotest-phpunit",
@@ -860,7 +835,7 @@ return {
           require("neotest-dart"),
           require("neotest-dotnet"),
           require("neotest-elixir"),
-          require("neotest-go"),
+          require("neotest-golang"),
           require("neotest-java"),
           require("neotest-jest"),
           require("neotest-phpunit"),
@@ -896,7 +871,7 @@ return {
   --  If you use other framework or language, refer to nvim-coverage docs:
   --  https://github.com/andythigpen/nvim-coverage/blob/main/doc/nvim-coverage.txt
   {
-    "andythigpen/nvim-coverage",
+    "zeioth/nvim-coverage", -- Our fork until all our PRs are merged.
     cmd = {
       "Coverage",
       "CoverageLoad",
@@ -922,7 +897,7 @@ return {
   -- This plugin is necessary for using <C-]> (go to ctag).
   {
     "skywind3000/gutentags_plus",
-    ft = { "c", "cpp" },
+    ft = { "c", "cpp", "lisp" },
     dependencies = { "ludovicchabant/vim-gutentags" },
     config = function()
       -- NOTE: On vimplugins we use config instead of opts.
@@ -933,11 +908,8 @@ return {
         desc = "Auto generate C/C++ tags",
         callback = function()
           local is_c = vim.bo.filetype == "c" or vim.bo.filetype == "cpp"
-          if is_c then
-            vim.g.gutentags_enabled = 1
-          else
-            vim.g.gutentags_enabled = 0
-          end
+          if is_c then vim.g.gutentags_enabled = 1
+          else vim.g.gutentags_enabled = 0 end
         end,
       })
     end,

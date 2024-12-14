@@ -1,3 +1,5 @@
+**Important** : You need Neovim 0.10+
+
 <div align="center">
   <img src="https://github.com/NormalNvim/NormalNvim/assets/3357792/76197752-0947-4392-a6bd-a59d64319028"></img>
   <h1><a href="https://github.com/NormalNvim/NormalNvim">NormalNvim</a></h1>
@@ -20,7 +22,7 @@
 ## Screenshots
 
 Tokyo Night (Night) theme by default
-![screenshot_2024-03-17_17-12-10_712765529](https://github.com/NormalNvim/NormalNvim/assets/3357792/096b260b-6678-405c-88b4-376a358e47d5)
+![screenshot_2024-10-04_23-22-02_932273168](https://github.com/user-attachments/assets/9191cf69-6fe2-4cde-ad43-d63d1469a681)
 
 The space key shows [all you can do](https://github.com/NormalNvim/NormalNvim/wiki/basic-mappings)
 ![screenshot_2024-03-12_22-48-45_446272370](https://github.com/NormalNvim/NormalNvim/assets/3357792/1fb4a576-e04f-481b-9692-67cdcc071d13)
@@ -79,7 +81,7 @@ The next relevant commands are provided by [distroupdate.nvim](https://github.co
 |  Command            | Description                             |
 |---------------------|-----------------------------------------|
 | **:DistroUpdate** | To update the distro from git origin. Local uncommited changes will be lost. |
-| **:DistroUpdateRevert** | To revert the last `:NvimDistroUpdate`. |
+| **:DistroUpdateRevert** | To revert the last `:DistroUpdate`. |
 | **:DistroFreezePluginVersions** | To save your current plugins versions into `lazy_versions.lua`. |
 
 ## FAQ
@@ -103,9 +105,8 @@ Please before opening an issue, check the [astrocommunity](https://github.com/As
 OPENAI_API_KEY="my_key_here"
 ```
 
-## 🌟 Support the project
-If you want to help me, please star this repository to increase the visibility of the project.
-
+## 🌟 Get involved
+One of the biggest challenges NormalNvim face is marketing. So share the project and tell your friends!
 [![Stargazers over time](https://starchart.cc/NormalNvim/NormalNvim.svg)](https://starchart.cc/NormalNvim/NormalNvim)
 
 ## Fix a bug and send a PR to appear as contributor
@@ -123,8 +124,21 @@ Special thanks to LeoRed04 for designing the logo.
 Did you know NormalNvim was the first Neovim distro to ship a compiler that [support 22+ programming languages out of the box](https://www.youtube.com/watch?v=O42uCIBaCIQ)?
 
 ## Roadmap
-* We are currently in a stable state.
+
+### Todos before v5.0 (2025)
+* Let's start doing some manual testing for the installer to ensure it install correctly on all OS.
+* Let's keep an eye on the plugins that display deprecation warnings on nvim 0.11 [here](https://github.com/nvim-neo-tree/neo-tree.nvim/issues/1588) and [here](https://github.com/ray-x/lsp_signature.nvim/issues/346). Full list of deprecations [here](https://neovim.io/doc/user/deprecated.html#deprecated).
+* It would be a neat UX improvement to integrate [snacks.nvim UI toggles](https://github.com/folke/snacks.nvim/blob/main/docs/toggle.md). But let's ensure code remain decoupled.
+* Compiler.nvim: test windows support.
+* Compiler.nvim: add support for justfiles and taskfiles.
+* Makeit.nvim: Add support for justfiles and taskfiles. 
+* Makeit.nvim: Remove orchestrators. This only make sense for compiler.nvim.
+* Makeit.nvim: Allow all possible conventions for `Makefile`, such as `makefile`, `Makefile.linux`, etc.
+* Compiler.nvim: Allow all possible conventions for `Makefile`, such as `makefile`, `Makefile.linux`, etc.
+* Compiler.nvim: test support for nim-lang.
+* Compiler.nvim: add support for new language `common LISP`.
+* Compiler.nvim: add support for new language `COBOL`.
+* Version v2 of the website should look considerably better.
+
+### Blocked
 * Once selene add [this](https://github.com/Kampfkarren/selene/issues/224) and [this](https://github.com/Kampfkarren/selene/issues/524) and [this](https://github.com/Kampfkarren/selene/pull/591), let's add the new rules.
-* ~~On aerial, let's keep an eye on [this](https://github.com/stevearc/aerial.nvim/issues/352) UX improvement.~~ → Thank you Steve.
-* Once nvim 0.10 is officially released, replace `get_active_clients` by `get_clients`.
-* During 2024, create a landing page. Pretty much it's gonna be the same thing we have on the wiki, but with sparkles.

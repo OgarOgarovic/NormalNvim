@@ -1,8 +1,8 @@
 -- Core behaviors
--- Things that add new behaviors.
+-- Plugins that add new behaviors.
 
 --    Sections:
---       -> ranger file browser    [ranger]
+--       -> yazi file browser      [yazi]
 --       -> project.nvim           [project search + auto cd]
 --       -> trim.nvim              [auto trim spaces]
 --       -> stickybuf.nvim         [lock special buffers]
@@ -20,49 +20,33 @@
 --       -> vim-matchup            [Improved % motion]
 --       -> hop.nvim               [go to word visually]
 --       -> nvim-autopairs         [auto close brackets]
+--       -> nvim-ts-autotag        [auto close html tags]
 --       -> lsp_signature.nvim     [auto params help]
 --       -> nvim-lightbulb         [lightbulb for code actions]
+--       -> hot-reload.nvim        [config reload]
 --       -> distroupdate.nvim      [distro update]
 
-local is_windows = vim.fn.has('win32') == 1         -- true if on windows
 local is_android = vim.fn.isdirectory('/data') == 1 -- true if on android
 
 return {
-  -- [ranger] file browser
-  -- https://github.com/kevinhwang91/rnvimr
-  -- This is NormalNvim file browser, which is only for Linux.
-  --
-  -- If you are on Windows, you have 3 options:
-  -- * Use neotree instead (<space>+e).
-  -- * Delete rnvimr and install some other file browser you like.
-  -- * Or enable WLS on Windows and launch neovim from there.
-  --   This way you can install and use 'ranger' and its dependency 'pynvim'.
+
+  -- [yazi] file browser
+  -- https://github.com/mikavilpas/yazi.nvim
+  -- Make sure you have yazi installed on your system!
   {
-    "kevinhwang91/rnvimr",
+    "mikavilpas/yazi.nvim",
     event = "User BaseDefered",
-    cmd = { "RnvimrToggle" },
-    enabled = not is_windows,
-    config = function()
-      -- vim.g.rnvimr_vanilla = 1            -- Often solves issues in your ranger config.
-      vim.g.rnvimr_enable_picker = 1         -- Close rnvimr after choosing a file.
-      vim.g.rnvimr_ranger_cmd = { "ranger" } -- By passing a script like TERM=foot ranger "$@" you can open terminals inside ranger.
-      if is_android then                     -- Open on full screenn
-        vim.g.rnvimr_layout = {
-          relative = "editor",
-          width = 200,
-          height = 100,
-          col = 0,
-          row = 0,
-          style = "minimal",
-        }
-      end
-    end,
+    cmd = { "Yazi", "Yazi cwd", "Yazi toggle" },
+    opts = {
+        open_for_directories = true,
+        floating_window_scaling_factor = (is_android and 1.0) or 0.71
+    },
   },
 
   -- project.nvim [project search + auto cd]
   -- https://github.com/ahmedkhalf/project.nvim
   {
-    "Zeioth/project.nvim",
+    "zeioth/project.nvim",
     event = "User BaseDefered",
     cmd = "ProjectRoot",
     opts = {
@@ -85,11 +69,11 @@ return {
       silent_chdir = false,
       manual_mode = false,
 
-      -- Don't auto-chdir for specific filetypes.
-      exclude_filetype_chdir = { "", "OverseerList", "alpha" },
-
-      -- Don't auto-chdir for specific buftypes.
-      exclude_buftype_chdir = { "nofile", "terminal" },
+      -- Don't chdir for certain buffers
+      exclude_chdir = {
+        filetype = {"", "OverseerList", "alpha"},
+        buftype = {"nofile", "terminal"},
+      },
 
       --ignore_lsp = { "lua_ls" },
       detection_methods = { "pattern", "lsp" },
@@ -144,11 +128,10 @@ return {
   -- https://github.com/max397574/better-escape.nvim
   {
     "max397574/better-escape.nvim",
-    event = "InsertCharPre",
+    event = "User BaseDefered",
     opts = {
-      mapping = {},
       timeout = 300,
-    },
+    }
   },
 
   -- Toggle floating terminal on <F7> [term]
@@ -339,19 +322,19 @@ return {
           sources = {
             {
               source = "filesystem",
-              display_name = get_icon("FolderClosed", 1, true) .. "File",
+              display_name = get_icon("FolderClosed", true) .. " File",
             },
             {
               source = "buffers",
-              display_name = get_icon("DefaultFile", 1, true) .. "Bufs",
+              display_name = get_icon("DefaultFile", true) .. " Bufs",
             },
             {
               source = "git_status",
-              display_name = get_icon("Git", 1, true) .. "Git",
+              display_name = get_icon("Git", true) .. " Git",
             },
             {
               source = "diagnostics",
-              display_name = get_icon("Diagnostic", 1, true) .. "Diagnostic",
+              display_name = get_icon("Diagnostic", true) .. " Diagnostic",
             },
           },
         },
@@ -362,9 +345,9 @@ return {
             folder_open = get_icon("FolderOpen"),
             folder_empty = get_icon("FolderEmpty"),
             folder_empty_open = get_icon("FolderEmpty"),
-            default = get_icon "DefaultFile",
+            default = get_icon("DefaultFile"),
           },
-          modified = { symbol = get_icon "FileModified" },
+          modified = { symbol = get_icon("FileModified") },
           git_status = {
             symbols = {
               added = get_icon("GitAdd"),
@@ -469,11 +452,11 @@ return {
         window = {
           width = 30,
           mappings = {
-            ["<space>"] = false, -- disable space until we figure out which-key disabling
+            ["<space>"] = false,
             ["<S-CR>"] = "system_open",
             ["[b"] = "prev_source",
             ["]b"] = "next_source",
-            F = utils.is_available "telescope.nvim" and "find_in_dir" or nil,
+            F = utils.is_available("telescope.nvim") and "find_in_dir" or nil,
             O = "system_open",
             Y = "copy_selector",
             h = "parent_or_close",
@@ -570,7 +553,7 @@ return {
   --  suda.nvim [write as sudo]
   --  https://github.com/lambdalisue/suda.vim
   {
-    "lambdalisue/suda.vim",
+    "lambdalisue/vim-suda",
     cmd = { "SudaRead", "SudaWrite" },
   },
 
@@ -599,6 +582,7 @@ return {
   {
     "windwp/nvim-autopairs",
     event = "InsertEnter",
+    dependencies = "windwp/nvim-ts-autotag",
     opts = {
       check_ts = true,
       ts_config = { java = false },
@@ -630,6 +614,19 @@ return {
     end
   },
 
+  -- nvim-ts-autotag [auto close html tags]
+  -- https://github.com/windwp/nvim-ts-autotag
+  -- Adds support for HTML tags to the plugin nvim-autopairs.
+  {
+    "windwp/nvim-ts-autotag",
+    event = "InsertEnter",
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "windwp/nvim-autopairs"
+    },
+    opts = {}
+  },
+
   -- lsp_signature.nvim [auto params help]
   -- https://github.com/ray-x/lsp_signature.nvim
   {
@@ -652,7 +649,7 @@ return {
         hint_enable = false, -- Display it as hint.
         hint_prefix = "👈 ",
 
-        -- Additionally, you can use <space>ui to toggle inlay hints.
+        -- Additionally, you can use <space>uH to toggle inlay hints.
         toggle_key_flip_floatwin_setting = is_enabled
       }
     end,
@@ -665,13 +662,13 @@ return {
   {
     'kosayoda/nvim-lightbulb',
     enabled = vim.g.codeactions_enabled,
-    event = "VeryLazy",
+    event = "User BaseFile",
     opts = {
-      action_kinds = {  -- show only for relevant code actions.
+      action_kinds = { -- show only for relevant code actions.
         "quickfix",
       },
       ignore = {
-        ft = { "lua" }, -- ignore filetypes with bad code actions.
+        ft = { "lua", "markdown" }, -- ignore filetypes with bad code actions.
       },
       autocmd = {
         enabled = true,
@@ -680,19 +677,40 @@ return {
       sign = { enabled = false },
       virtual_text = {
         enabled = true,
-        text = "💡"
+        text = require("base.utils").get_icon("Lightbulb")
       }
     },
     config = function(_, opts) require("nvim-lightbulb").setup(opts) end
   },
 
   -- distroupdate.nvim [distro update]
-  -- https://github.com/Zeioth/distroupdate.nvim
+  -- https://github.com/zeioth/distroupdate.nvim
   {
-    "Zeioth/distroupdate.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim"
-    },
+    "zeioth/hot-reload.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    event = "User BaseFile",
+    opts = function()
+      local utils = require("base.utils")
+      local config_dir = utils.os_path(vim.fn.stdpath "config" .. "/lua/base/")
+      return {
+        notify = true,
+        reload_files = {
+          config_dir .. "1-options.lua",
+          config_dir .. "4-mappings.lua"
+        },
+        reload_callback = function()
+          vim.cmd(":silent! colorscheme " .. vim.g.default_colorscheme) -- nvim     colorscheme reload command
+          vim.cmd(":silent! doautocmd ColorScheme")                     -- heirline colorscheme reload event
+        end
+      }
+    end
+  },
+
+  -- distroupdate.nvim [distro update]
+  -- https://github.com/zeioth/distroupdate.nvim
+  {
+    "zeioth/distroupdate.nvim",
+    event = "User BaseFile",
     cmd = {
       "DistroFreezePluginVersions",
       "DistroReadChangelog",
@@ -700,21 +718,9 @@ return {
       "DistroUpdate",
       "DistroUpdateRevert"
     },
-    opts = function()
-      local utils = require("base.utils")
-      local config_dir = utils.os_path(vim.fn.stdpath "config" .. "/lua/base/")
-      return {
-        channel = "stable", -- stable/nightly
-        hot_reload_files = {
-          config_dir .. "1-options.lua",
-          config_dir .. "4-mappings.lua"
-        },
-        hot_reload_callback = function()
-          vim.cmd(":silent! colorscheme " .. base.default_colorscheme) -- nvim     colorscheme reload command
-          vim.cmd(":silent! doautocmd ColorScheme")                    -- heirline colorscheme reload event
-        end
-      }
-    end
+    opts = {
+        channel = "stable" -- stable/nightly
+    }
   },
 
   -- neovim org mode

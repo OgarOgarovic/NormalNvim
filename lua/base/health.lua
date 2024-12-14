@@ -1,35 +1,40 @@
 -- Command to check if you have the required dependencies to use NormalNvim.
---
+
 -- DESCRIPTION:
--- To use it run the command :healthcheck base
+-- To use it run the command :checkhealth base
 
 local M = {}
 
-local health = {
-  start = vim.health.start or vim.health.report_start,
-  ok = vim.health.ok or vim.health.report_ok,
-  warn = vim.health.warn or vim.health.report_warn,
-  error = vim.health.error or vim.health.report_error,
-  info = vim.health.info or vim.health.report_info,
-}
-
 function M.check()
-  health.start "NormalNvim"
+  -- Get normalnvim_version from the plugin distroupdate, if present.
+  local success, git_utils = pcall(require, "distroupdate.utils.git")
+  success = success and vim.fn.executable("git") == 1
+  local normalnvim_version = success and git_utils.current_version(false) or "unknown"
+  local distroupdate_config = vim.g.distroupdate_config or {}
 
-  health.info(
-    "NormalNvim Version: " .. require("distroupdate.utils.updater").version(true)
-  )
-  health.info(
+  if distroupdate_config.branch == "nightly" then
+    normalnvim_version = ("nightly (%s)"):format(normalnvim_version)
+  end
+
+  -- Title
+  vim.health.start("NormalNvim health stats:")
+
+  -- Print NormalNvim version
+  vim.health.info("NormalNvim Version: " .. normalnvim_version)
+  vim.health.info(
     "Neovim Version: v"
-    .. vim.fn.matchstr(vim.fn.execute "version", "NVIM v\\zs[^\n]*")
+      .. vim.fn.matchstr(vim.fn.execute("version"), "NVIM v\\zs[^\n]*")
   )
 
+  -- Print Neovim version
   if vim.version().prerelease then
-    health.warn "Neovim nightly is not officially supported and may have breaking changes"
-  elseif vim.fn.has "nvim-0.8" == 1 then
-    health.ok "Using stable Neovim >= 0.8.0"
+    vim.health.warn(
+      "Neovim nightly is not officially supported and may have breaking changes"
+    )
+  elseif vim.fn.has("nvim-0.10") == 1 then
+    vim.health.ok("Using stable Neovim >= 0.10.0")
   else
-    health.error "Neovim >= 0.8.0 is required"
+    vim.health.error("Neovim >= 0.10.0 is required")
   end
 
   -- Checks to perform.
@@ -37,12 +42,17 @@ function M.check()
     {
       cmd = { "git" },
       type = "error",
-      msg = "Used for core functionality such as updater and plugin management",
+      msg = "Used for core functionality such as updater and plugin management.",
+    },
+    {
+      cmd = { "luarocks" },
+      type = "error",
+      msg = "Used for core functionality such as updater and plugin management.",
     },
     {
       cmd = { "node" },
       type = "error",
-      msg = "Used for core functionality such as updater and plugin management",
+      msg = "Used for core functionality such as updater and plugin management.",
     },
     {
       cmd = { "yarn" },
@@ -53,6 +63,11 @@ function M.check()
       cmd = { "cargo" },
       type = "error",
       msg = "Used by nvim-spectre to install oxi. Also by dooku.nvim to generate rust html docs.",
+    },
+    {
+      cmd = { "yazi" },
+      type = "error",
+      msg = "Used to enable yazi file browser.",
     },
     {
       cmd = { "markmap" },
@@ -73,17 +88,6 @@ function M.check()
       cmd = { "gitui" },
       type = "warn",
       msg = "Used for mappings to pull up git TUI (Optional)",
-    },
-    {
-      cmd = { "pynvim" },
-      type = "warn",
-      msg =
-      "Used to enable ranger file browser (optional)\nNOTE: checkhealth won't detect this correctly, but you can ensure it is installed with 'pip list | grep pynvim'.",
-    },
-    {
-      cmd = { "ranger" },
-      type = "warn",
-      msg = "Used to enable ranger file browser (Optional)",
     },
     {
       cmd = { "delta" },
@@ -113,14 +117,12 @@ function M.check()
     {
       cmd = { "cargo nextest" },
       type = "warn",
-      msg =
-      "Used to run rust tests (optional)\nNOTE: checkhealth won't detect this correctly, but you can confirm it works correctly with 'cargo nextest'.",
+      msg = "Used to run rust tests (optional)\nNOTE: checkhealth won't detect this correctly, but you can confirm it works correctly with 'cargo nextest'.",
     },
     {
       cmd = { "nunit" },
       type = "warn",
-      msg =
-      "Used to run C# tests (optional)\nNOTE: There is no way to install this system wide. To use it you must add it to your dotnet C# project: 'dotnet add package NUnit NUnit3TestAdapter'.",
+      msg = "Used to run C# tests (optional)\nNOTE: There is no way to install this system wide. To use it you must add it to your dotnet C# project: 'dotnet add package NUnit NUnit3TestAdapter'.",
     },
     {
       cmd = { "csc" },
@@ -135,8 +137,7 @@ function M.check()
     {
       cmd = { "dotnet" },
       type = "warn",
-      msg =
-      "Used by compiler.nvim and DAP to operate with dotnet projects (optional)\nNOTE: Make sure you also have the system package dotnet-sdk installed.",
+      msg = "Used by compiler.nvim and DAP to operate with dotnet projects (optional)\nNOTE: Make sure you also have the system package dotnet-sdk installed.",
     },
     {
       cmd = { "java" },
@@ -180,7 +181,7 @@ function M.check()
       msg = "Used by compiler.nvim to interpretate python (Optional)",
     },
     {
-      cmd = { "nuitka3" },
+      cmd = { "nuitka" },
       type = "warn",
       msg = "Used by compiler.nvim to compile python to machine code (Optional)",
     },
@@ -200,14 +201,24 @@ function M.check()
       msg = "Used by compiler.nvim to interpretate perl (optional)",
     },
     {
+      cmd = { "swiftc" },
+      type = "warn",
+      msg = "Used by compiler.nvim to compile swift (optional)",
+    },
+    {
       cmd = { "swift" },
       type = "warn",
       msg = "Used by compiler.nvim to compile swift (optional)",
     },
     {
-      cmd = { "swiftc" },
+      cmd = { "gfortran" },
       type = "warn",
-      msg = "Used by compiler.nvim to compile swift (optional)",
+      msg = "Used by compiler.nvim to compile fortran (optional)",
+    },
+    {
+      cmd = { "fpm" },
+      type = "warn",
+      msg = "Used by compiler.nvim to compile fortran (optional)",
     },
     {
       cmd = { "go" },
@@ -217,8 +228,7 @@ function M.check()
     {
       cmd = { "godoc" },
       type = "warn",
-      msg =
-      "Used by dooku.nvim to generate go html docs\nNOTE: If you have it installed but you can't run it on the terminal, ensure you have added 'go' to your OS path (optional)",
+      msg = "Used by dooku.nvim to generate go html docs\nNOTE: If you have it installed but you can't run it on the terminal, ensure you have added 'go' to your OS path (optional)",
     },
     {
       cmd = { "doxygen" },
@@ -241,15 +251,15 @@ function M.check()
     end
 
     if found then
-      health.ok(("`%s` is installed: %s"):format(name, program.msg))
+      vim.health.ok(("`%s` is installed: %s"):format(name, program.msg))
     else
-      health[program.type](
+      vim.health[program.type](
         ("`%s` is not installed: %s"):format(name, program.msg)
       )
     end
   end
-  health.info("")
-  health.info("Write `:bw` to close `:checkhealth` gracefully.")
+  vim.health.info("")
+  vim.health.info("Write `:bw` to close `:checkhealth` gracefully.")
 end
 
 return M
