@@ -189,7 +189,17 @@ return {
       --   "Method",
       --   -- "Struct",
       -- },
-      filter_kind = false,
+      filter_kind = {
+        ['_'] = false,
+        python = {
+          "Class",
+          "Function",
+          "Method",
+          "Struct",
+          "Interface",
+          "Constructor"
+        },
+      },
       open_automatic = false, -- Open if the buffer is compatible
       autojump = true,
       link_folds_to_tree = false,
